@@ -41,7 +41,7 @@ from ingestion.pipeline import IngestionPipeline
 logger = get_logger("api")
 
 app = FastAPI(
-    title="AI-Powered Knowledge Retrieval Agent",
+    title="Knowledge Retrieval Agent",
     version="1.0.0",
     description="Production RAG pipeline: ingest -> retrieve -> generate.",
 )

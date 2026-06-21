@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the AI-Powered Knowledge Retrieval Agent are documented here.
+All notable changes to the Knowledge Retrieval Agent are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [1.0.0] — 2026-06-15

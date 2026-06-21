@@ -1,4 +1,4 @@
-# Makefile for the AI-Powered Knowledge Retrieval Agent.
+# Makefile for the Knowledge Retrieval Agent.
 # On Windows, run targets from Git Bash / WSL, or invoke the commands directly.
 
 PYTHON ?= python
