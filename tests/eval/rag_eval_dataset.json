@@ -1,0 +1,102 @@
+[
+  {
+    "question": "Within how many days can a customer request a full refund?",
+    "ground_truth": "A customer may request a full refund within 30 days of the original purchase date.",
+    "contexts": ["Customers may request a full refund within 30 days of the original purchase date."]
+  },
+  {
+    "question": "Are gift cards refundable?",
+    "ground_truth": "No, gift cards are non-refundable under all circumstances.",
+    "contexts": ["Gift cards, downloadable software licenses that have been activated, and personalized or custom-made products are non-refundable under all circumstances."]
+  },
+  {
+    "question": "How long do customers have for store credit eligibility?",
+    "ground_truth": "Purchases older than 30 days but within 90 days are eligible for store credit only.",
+    "contexts": ["Purchases older than 30 days but within 90 days are eligible for store credit only."]
+  },
+  {
+    "question": "Who pays return shipping when a product is defective?",
+    "ground_truth": "Acme Corp covers the return shipping when the return is due to a defect or an error by Acme Corp.",
+    "contexts": ["Return shipping costs are the responsibility of the customer unless the return is due to a defect or an error by Acme Corp, in which case Acme Corp covers the return shipping."]
+  },
+  {
+    "question": "How long are digital products refundable?",
+    "ground_truth": "Digital products and subscription services are refundable within 14 days of purchase if less than 20 percent of usage has been consumed.",
+    "contexts": ["Digital products and subscription services are refundable within 14 days of purchase provided that less than 20 percent of the included usage has been consumed."]
+  },
+  {
+    "question": "What was Acme Corp's total annual revenue in fiscal year 2024?",
+    "ground_truth": "Total annual revenue was 145 million dollars in fiscal year 2024.",
+    "contexts": ["Acme Corp reported total annual revenue of 145 million dollars in fiscal year 2024, representing a 22 percent increase over the prior year."]
+  },
+  {
+    "question": "What percentage of revenue came from subscriptions?",
+    "ground_truth": "Recurring subscription revenue accounted for 68 percent of total revenue.",
+    "contexts": ["Recurring subscription revenue accounted for 68 percent of total revenue."]
+  },
+  {
+    "question": "How much revenue did the enterprise segment generate?",
+    "ground_truth": "The enterprise segment generated 92 million dollars in revenue.",
+    "contexts": ["The enterprise segment generated 92 million dollars in revenue, while the small and medium business segment contributed 41 million dollars."]
+  },
+  {
+    "question": "What was the net income for fiscal year 2024?",
+    "ground_truth": "Net income for fiscal year 2024 was 27 million dollars.",
+    "contexts": ["Net income for fiscal year 2024 was 27 million dollars, yielding a net profit margin of approximately 18.6 percent."]
+  },
+  {
+    "question": "What was the net profit margin?",
+    "ground_truth": "The net profit margin was approximately 18.6 percent.",
+    "contexts": ["Net income for fiscal year 2024 was 27 million dollars, yielding a net profit margin of approximately 18.6 percent."]
+  },
+  {
+    "question": "What is the projected revenue growth for fiscal year 2025?",
+    "ground_truth": "Management projects revenue growth of 18 to 24 percent for fiscal year 2025.",
+    "contexts": ["Management projects revenue growth of 18 to 24 percent for fiscal year 2025, driven primarily by expansion of the enterprise subscription base and international markets."]
+  },
+  {
+    "question": "How many vacation days do full-time employees accrue per year?",
+    "ground_truth": "Full-time employees accrue twenty days of paid vacation per year.",
+    "contexts": ["Full-time employees accrue twenty days of paid vacation per year, in addition to ten paid public holidays."]
+  },
+  {
+    "question": "How many days per week can employees work remotely?",
+    "ground_truth": "Employees may work remotely up to three days per week.",
+    "contexts": ["Employees may work remotely up to three days per week."]
+  },
+  {
+    "question": "How long is paid parental leave?",
+    "ground_truth": "New parents are entitled to sixteen weeks of paid parental leave.",
+    "contexts": ["New parents are entitled to sixteen weeks of paid parental leave, which may be taken at any point within the first twelve months following the birth or adoption of a child."]
+  },
+  {
+    "question": "What is the annual professional development budget per employee?",
+    "ground_truth": "Each employee receives an annual professional development budget of two thousand dollars.",
+    "contexts": ["Each employee receives an annual professional development budget of two thousand dollars, which may be used for courses, conferences, certifications, or books that are relevant to their role."]
+  },
+  {
+    "question": "What are the core collaboration hours?",
+    "ground_truth": "Core collaboration hours run from ten in the morning to three in the afternoon.",
+    "contexts": ["Core collaboration hours, during which all team members are expected to be available, run from ten in the morning to three in the afternoon."]
+  },
+  {
+    "question": "How many sick days are granted per year?",
+    "ground_truth": "Sick leave is granted at ten days per year and does not roll over.",
+    "contexts": ["Sick leave is granted separately at ten days per year and does not roll over."]
+  },
+  {
+    "question": "How much did Acme Corp spend on research and development?",
+    "ground_truth": "Research and development spending rose to 31 million dollars.",
+    "contexts": ["Research and development spending rose to 31 million dollars, the largest single expense category."]
+  },
+  {
+    "question": "What was the gross margin in fiscal year 2024?",
+    "ground_truth": "Gross margin improved to 74 percent, up from 70 percent the previous year.",
+    "contexts": ["Gross margin improved to 74 percent, up from 70 percent in the previous fiscal year."]
+  },
+  {
+    "question": "How much cash did the company have at year end?",
+    "ground_truth": "The company ended the year with 63 million dollars in cash and cash equivalents.",
+    "contexts": ["The company ended the fiscal year with 63 million dollars in cash and cash equivalents, with no outstanding long-term debt."]
+  }
+]

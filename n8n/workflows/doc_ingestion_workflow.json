@@ -1,0 +1,150 @@
+{
+  "name": "Document Ingestion Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ingest",
+        "options": {}
+      },
+      "id": "trigger-webhook",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "webhookId": "doc-ingest"
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json[\"file_path\"].split('.').pop().toLowerCase() }}",
+        "rules": {
+          "rules": [
+            { "value2": "pdf", "output": 0 },
+            { "value2": "docx", "output": 1 },
+            { "value2": "txt", "output": 2 },
+            { "value2": "md", "output": 2 }
+          ]
+        },
+        "fallbackOutput": 3
+      },
+      "id": "switch-classify",
+      "name": "Switch: Document Classification",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8080/ingest",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-API-Key", "value": "={{ $env.FASTAPI_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ file_path: $json.file_path, namespace: $json.namespace || 'default', vector_store: $json.vector_store || 'chroma', force: $json.force || false }) }}",
+        "options": {
+          "retry": { "maxTries": 3, "waitBetweenTries": 2000 }
+        }
+      },
+      "id": "http-ingest",
+      "name": "HTTP Request: Ingest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            { "value1": "={{ $json.chunks_upserted }}", "operation": "largerEqual", "value2": 0 }
+          ],
+          "string": [
+            { "value1": "={{ $json.status }}", "operation": "notEqual", "value2": "error" }
+          ]
+        }
+      },
+      "id": "if-success",
+      "name": "IF: Success Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [920, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO ingestion_log (request_id, doc_name, namespace, chunks_total, chunks_upserted, chunks_skipped, duration_ms, created_at) VALUES ('{{ $json.request_id }}', '{{ $json.doc_name }}', '{{ $json.namespace }}', {{ $json.chunks_total }}, {{ $json.chunks_upserted }}, {{ $json.chunks_skipped }}, {{ $json.duration_ms }}, NOW());"
+      },
+      "id": "pg-index-update",
+      "name": "Postgres: Index Update",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1160, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8080/summarize",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ request_id: $json.request_id, doc_name: $json.doc_name }) }}",
+        "options": { "retry": { "maxTries": 3, "waitBetweenTries": 2000 } }
+      },
+      "id": "http-summarize",
+      "name": "HTTP Request: Summarization",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1380, 200]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "text": "=:white_check_mark: Ingestion complete for *{{ $json.doc_name }}* — {{ $json.chunks_upserted }} chunks upserted, {{ $json.chunks_skipped }} skipped in {{ $json.duration_ms }}ms (namespace: {{ $json.namespace }})."
+      },
+      "id": "slack-notify",
+      "name": "Slack: Completion Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [1600, 200]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "text": "=:rotating_light: Ingestion FAILED for payload {{ JSON.stringify($json) }}. Routing to on-call channel."
+      },
+      "id": "slack-error",
+      "name": "Slack: Error Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [1160, 420]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": { "main": [[{ "node": "Switch: Document Classification", "type": "main", "index": 0 }]] },
+    "Switch: Document Classification": {
+      "main": [
+        [{ "node": "HTTP Request: Ingest", "type": "main", "index": 0 }],
+        [{ "node": "HTTP Request: Ingest", "type": "main", "index": 0 }],
+        [{ "node": "HTTP Request: Ingest", "type": "main", "index": 0 }],
+        [{ "node": "HTTP Request: Ingest", "type": "main", "index": 0 }]
+      ]
+    },
+    "HTTP Request: Ingest": { "main": [[{ "node": "IF: Success Check", "type": "main", "index": 0 }]] },
+    "IF: Success Check": {
+      "main": [
+        [{ "node": "Postgres: Index Update", "type": "main", "index": 0 }],
+        [{ "node": "Slack: Error Alert", "type": "main", "index": 0 }]
+      ]
+    },
+    "Postgres: Index Update": { "main": [[{ "node": "HTTP Request: Summarization", "type": "main", "index": 0 }]] },
+    "HTTP Request: Summarization": { "main": [[{ "node": "Slack: Completion Notification", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1", "saveDataErrorExecution": "all", "saveDataSuccessExecution": "all", "saveExecutionProgress": true },
+  "active": false,
+  "tags": ["knowledge-retrieval-agent", "ingestion"]
+}

@@ -1,0 +1,32 @@
+services:
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: kra-chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./chroma_db:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  api:
+    build: .
+    container_name: kra-api
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - VECTOR_STORE=chroma
+      - CHROMA_PERSIST_DIR=/app/chroma_db
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./logs:/app/logs
+    depends_on:
+      - chromadb

@@ -1,0 +1,113 @@
+{
+  "name": "Query Routing Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ask",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-ask",
+      "name": "Webhook: /ask",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "webhookId": "ask"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8080/query",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-API-Key", "value": "={{ $env.FASTAPI_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: $json.body.query, namespace: $json.body.namespace || 'default', filters: $json.body.filters || null }) }}",
+        "options": { "retry": { "maxTries": 3, "waitBetweenTries": 2000 } }
+      },
+      "id": "http-query",
+      "name": "HTTP Request: Query",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nreturn [{ json: { answer: r.answer, sources: r.sources, confidence_score: r.confidence_score, latency_ms: r.latency_ms, request_id: r.request_id } }];"
+      },
+      "id": "code-shape",
+      "name": "Code: Response Shaping",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            { "value1": "={{ $json.confidence_score }}", "operation": "smaller", "value2": 0.65 }
+          ]
+        }
+      },
+      "id": "if-confidence",
+      "name": "IF: Confidence Threshold",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [920, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO query_log (request_id, query, confidence_score, latency_ms, sources, created_at) VALUES ('{{ $json.request_id }}', '{{ $node[\"Webhook: /ask\"].json.body.query }}', {{ $json.confidence_score }}, {{ $json.latency_ms }}, '{{ JSON.stringify($json.sources) }}', NOW());"
+      },
+      "id": "pg-query-log",
+      "name": "Postgres: Query Logging",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1160, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}"
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1380, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ answer: 'No sufficiently relevant documents found.', sources: [], confidence_score: $json.confidence_score, low_confidence: true }) }}"
+      },
+      "id": "respond-lowconf",
+      "name": "Respond: Low Confidence",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1160, 420]
+    }
+  ],
+  "connections": {
+    "Webhook: /ask": { "main": [[{ "node": "HTTP Request: Query", "type": "main", "index": 0 }]] },
+    "HTTP Request: Query": { "main": [[{ "node": "Code: Response Shaping", "type": "main", "index": 0 }]] },
+    "Code: Response Shaping": { "main": [[{ "node": "IF: Confidence Threshold", "type": "main", "index": 0 }]] },
+    "IF: Confidence Threshold": {
+      "main": [
+        [{ "node": "Respond: Low Confidence", "type": "main", "index": 0 }],
+        [{ "node": "Postgres: Query Logging", "type": "main", "index": 0 }]
+      ]
+    },
+    "Postgres: Query Logging": { "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1", "saveDataErrorExecution": "all", "saveDataSuccessExecution": "all" },
+  "active": false,
+  "tags": ["knowledge-retrieval-agent", "query"]
+}

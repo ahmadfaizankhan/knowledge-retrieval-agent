@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowledge-retrieval-agent"
+version = "1.0.0"
+description = "AI-Powered Knowledge Retrieval Agent — production RAG pipeline."
+requires-python = ">=3.11"
+readme = "README.md"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+omit = [
+    "tests/*",
+    "scripts/*",
+    ".venv/*",
+]

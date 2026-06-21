@@ -1,0 +1,67 @@
+{
+  "annotations": { "list": [] },
+  "title": "Knowledge Retrieval Agent",
+  "uid": "kra-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "tags": ["rag", "knowledge-retrieval-agent"],
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": { "text": "Prometheus", "value": "Prometheus" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Query latency p50 / p95 / p99 (s)",
+      "type": "timeseries",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum(rate(query_latency_seconds_bucket[5m])) by (le))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, sum(rate(query_latency_seconds_bucket[5m])) by (le))", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.99, sum(rate(query_latency_seconds_bucket[5m])) by (le))", "legendFormat": "p99" }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Queries per second by outcome",
+      "type": "timeseries",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(queries_total[5m])) by (outcome)", "legendFormat": "{{outcome}}" }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Mean retrieval score (last query)",
+      "type": "stat",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 8 },
+      "targets": [{ "expr": "retrieval_score_mean" }]
+    },
+    {
+      "id": 4,
+      "title": "Total chunks ingested",
+      "type": "stat",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 8 },
+      "targets": [{ "expr": "ingestion_chunks_total" }]
+    },
+    {
+      "id": 5,
+      "title": "LLM tokens used (rate)",
+      "type": "timeseries",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 8 },
+      "targets": [{ "expr": "rate(llm_tokens_used_total[5m])", "legendFormat": "tokens/s" }]
+    }
+  ]
+}
